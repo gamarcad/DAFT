@@ -1,0 +1,38 @@
+[package]
+name = "rabe-console"
+version = "0.3.0"
+description = "Console App for the ABE Schemes implemented in rabe."
+authors = [
+    "Schanzenbach, Martin <martin.schanzenbach@aisec.fraunhofer.de>",
+    "Bramm, Georg <georg.bramm@aisec.fraunhofer.de>",
+    "Schuette, Julian <julian.schuette@aisec.fraunhofer.de>"
+]
+keywords = ["pairing","crypto","cryptography", "abe"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/Fraunhofer-AISEC/rabe"
+repository = "https://github.com/Fraunhofer-AISEC/rabe"
+documentation = "https://docs.rs/rabe"
+
+[features]
+default = ["serde"]
+std = []
+borsh = ["borsh/std", "rabe/borsh"]
+serde = ["serde/std", "serde_cbor/std", "rabe/serde"]
+
+[[bin]]
+name = "rabe"
+path = "src/mod.rs"
+
+[dependencies]
+borsh = { version = "0.9.3", optional = true, default-features = false }
+rustc-hex = "2.1.0"
+deflate = "0.9.0"
+inflate = "0.4.5"
+clap = "2.33.3"
+rand = "0.8.5"
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_cbor = { version = "0.11.2", optional = true, default-features = false }
+pest = "2.0"
+pest_derive = "2.0"
+rabe = { path = "..", optional = true, default-features = false }
