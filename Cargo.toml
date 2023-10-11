@@ -35,6 +35,15 @@ criterion = { version = "0.4", features = ["html_reports"] }
 
 
 
+
 [[bench]]
-name = "my_bench"
+name = "primitives"
+harness = false
+
+[[bench]]
+name = "daft"
+harness = false
+
+[[bench]]
+name = "csv"
 harness = false
