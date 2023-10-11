@@ -2,6 +2,7 @@ use criterion::{Criterion, black_box};
 
 use daft::abe::{abe_setup, abe_encrypt, abe_decrypt, Plaintext};
 
+#[allow(dead_code)]
 pub fn daft_abe_setup(c : &mut Criterion) {
     c.bench_function("daft-abe-setup", |b| {
 
@@ -12,10 +13,10 @@ pub fn daft_abe_setup(c : &mut Criterion) {
     });
 }
 
-
+#[allow(dead_code)]
 pub fn daft_abe_key_gen(c : &mut Criterion) {
     c.bench_function("daft-abe-key-gen", |b| {
-        let (pk, msk) = abe_setup();
+        let (_, msk) = abe_setup();
         
 
         b.iter(|| {
@@ -26,10 +27,10 @@ pub fn daft_abe_key_gen(c : &mut Criterion) {
     });
 }
 
-
+#[allow(dead_code)]
 pub fn daft_abe_encryption(c : &mut Criterion) {
     c.bench_function("daft-abe-encryption", |b| {
-        let (pk, msk) = abe_setup();
+        let (pk, _) = abe_setup();
         let policy = String::from(r#""A" and "B""#);
         let plaintext : Plaintext = Plaintext::from(vec![1, 2]);
         
@@ -41,7 +42,7 @@ pub fn daft_abe_encryption(c : &mut Criterion) {
     });
 }
 
-
+#[allow(dead_code)]
 pub fn daft_abe_decryption(c : &mut Criterion) {
     c.bench_function("daft-abe-decryption", |b| {
         let (pk, msk) = abe_setup();

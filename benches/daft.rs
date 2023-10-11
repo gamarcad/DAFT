@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use criterion::{Criterion, black_box, Bencher, Throughput, BenchmarkId};
-use daft::abe::{Plaintext};
+use criterion::{Criterion, black_box, BenchmarkId, criterion_group, criterion_main};
+use daft::abe::Plaintext;
 use daft::daft::daft::{sender_key_gen, authority_key_gen, prepare_sending, authenticate_received_file};
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use std::fs::File;
 
 
@@ -12,10 +12,10 @@ static START : usize = 50;
 static END : usize = 500;
 static STEP : usize = 50;
 
-
+#[allow(dead_code)]
 pub fn daft_file_transfer(c : &mut Criterion) {
-    let (verification_key, signing_key ) = sender_key_gen();
-    let (apk, ask) = authority_key_gen();
+    let (_, signing_key ) = sender_key_gen();
+    let (apk, _) = authority_key_gen();
 
     
 
@@ -34,7 +34,7 @@ pub fn daft_file_transfer(c : &mut Criterion) {
                     access_policy, 
                     &plaintext
                 );
-                black_box((response.is_ok()));
+                black_box(response.is_ok());
 
             });
         });
@@ -43,7 +43,7 @@ pub fn daft_file_transfer(c : &mut Criterion) {
     group.finish();
 }
 
-
+#[allow(dead_code)]
 pub fn daft_file_reception(c : &mut Criterion) {
     let (verification_key, signing_key ) = sender_key_gen();
     let (apk, ask) = authority_key_gen();
@@ -77,7 +77,7 @@ pub fn daft_file_reception(c : &mut Criterion) {
                     &link, 
                     &ciphertext
                 );
-                black_box((plaintext_response.is_ok()));
+                black_box(plaintext_response.is_ok());
 
             });
         });
@@ -86,8 +86,8 @@ pub fn daft_file_reception(c : &mut Criterion) {
 }
 
 
-
-pub fn daft_benchmarks_into_csv(c : &mut Criterion) {
+#[allow(dead_code)]
+pub fn daft_benchmarks_into_csv(_ : &mut Criterion) {
     // create the local variables inside the programm
     let mut record_execution_time = HashMap::new();
     let mut record_communication_size = HashMap::new();
@@ -126,7 +126,7 @@ pub fn daft_benchmarks_into_csv(c : &mut Criterion) {
             }; 
 
             let (link, signature, ciphertext) = response;
-            let (response, receive_execution_time) = {
+            let (_, receive_execution_time) = {
                 let start = Instant::now();
                 let plaintext_response = authenticate_received_file(
                     &verification_key, 
@@ -162,22 +162,22 @@ pub fn daft_benchmarks_into_csv(c : &mut Criterion) {
     bar.finish();
 
     // export the result into a csv file
-    let mut file = File::create("execution_time.csv").unwrap();
+    let file = File::create("execution_time.csv").unwrap();
     let mut wtr = csv::Writer::from_writer(file);
-    wtr.write_record(&["file_size", "send", "receive"]);
+    let _ = wtr.write_record(&["file_size", "send", "receive"]);
     for (file_size, (send_execution_time, receive_execution_time)) in record_execution_time.iter() {
-        wtr.write_record(&[
+        let _ = wtr.write_record(&[
             file_size, 
             &(*send_execution_time as usize / NB_ITER),
             &(*receive_execution_time as usize / NB_ITER)
         ].map(|n| n.to_string()));
     }
 
-    let mut file = File::create("communication_size.csv").unwrap();
+    let file = File::create("communication_size.csv").unwrap();
     let mut wtr = csv::Writer::from_writer(file);
-    wtr.write_record(&["file_size", "naive", "daft_users", "daft_storage"]);
+    let _ = wtr.write_record(&["file_size", "naive", "daft_users", "daft_storage"]);
     for (file_size, (naive, daft_users, daft_storage)) in record_communication_size.iter() {
-        wtr.write_record(&[
+        let _ = wtr.write_record(&[
             file_size, 
             naive,
             daft_users,
@@ -185,3 +185,15 @@ pub fn daft_benchmarks_into_csv(c : &mut Criterion) {
         ].map(|n| n.to_string()));
     }
 }
+
+
+criterion_group!(
+    name = daft;
+    config = Criterion::default();
+    targets = 
+    daft_file_transfer, daft_file_reception
+        
+);
+
+
+criterion_main!(daft);

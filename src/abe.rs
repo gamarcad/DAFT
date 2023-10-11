@@ -13,13 +13,13 @@ use rabe::{schemes::ac17::{Ac17PublicKey, Ac17MasterKey, Ac17CpSecretKey, Ac17Cp
 use rabe::schemes::ac17::{setup, cp_encrypt_rng, cp_decrypt, cp_keygen};
 use rand::{Rng, thread_rng};
 use serde::{Serialize, Deserialize};
-use sha2::{Sha256, Digest, Sha512_256};
+use sha2::{Digest, Sha512_256};
 use std::fmt;
 use rand_chacha::ChaCha8Rng;
 use rand::prelude::*;
 use openssl::symm::{Cipher,encrypt, decrypt};
 use mk256::mk256;
-use bincode::{serialize};
+use bincode::serialize;
 
 
 /// 
@@ -113,20 +113,45 @@ pub struct Ciphertext {
 }
 
 impl Ciphertext {
+    /// Returns the length of the ciphertext in bytes.
     pub fn len(&self) -> usize {
         let encoded_e = serialize(&self.e).unwrap();
         encoded_e.len() + self.c.len()
     }
 
+
+    /// Returns the 256-bits hash of the ciphertext.
+    /// 
+    /// Depending on the trust of the ciphertext, embedding
+    /// the hash of the symmetric encryption, one may choose
+    /// to compute the hash with or without a pre-computed hash,
+    /// in order to speed up the hash calculation with the other 
+    /// fields. 
+    /// 
+    /// This function do not trust the pre-computed hash and hence 
+    /// recompute the hash. 
     pub fn hash_without_trusted_hash_c(&self) -> [u8; 32] {
         let hash_c = mk256(&self.c);
         self.hash(hash_c)
     }
 
+
+    /// Returns the 256-bits hash of the ciphertext.
+    /// 
+    /// Depending on the trust of the ciphertext, embedding
+    /// the hash of the symmetric encryption, one may choose
+    /// to compute the hash with or without a pre-computed hash,
+    /// in order to speed up the hash calculation with the other 
+    /// fields. 
+    /// 
+    /// This function trusts the pre-computed hash and hence 
+    /// do not compute the hash of the symmetric encryption.
     pub fn hash_with_trusted_hash_c(&self) -> [u8; 32] {
         self.hash(self.hash_c)
     }
 
+
+    
     fn  hash(&self, hash_c : [u8; 32]) -> [u8; 32] {
         let encoded_e =  serialize(&self.e).unwrap();
         let mut cipher = Sha512_256::new();
@@ -163,8 +188,6 @@ impl MasterSecretKey {
         let sk = cp_keygen(&self.msk, &x);
         SecretKey { x, sk: sk.unwrap() }
     }
-
-    
 }
 
 
@@ -174,6 +197,12 @@ impl MasterSecretKey {
 pub struct SecretKey {
     x : Vec<String>,
     sk : Ac17CpSecretKey
+}
+
+impl SecretKey {
+    pub fn attr(&self) -> &Vec<String> {
+        &self.x
+    }
 }
 
 
@@ -200,7 +229,7 @@ pub fn abe_encrypt(
 
     // Randomly chosen a message of s byte.
     let mut sigma = [0u8; MESSAGE_LENGTH];
-    sigma = sigma.map(|x| rng.gen::<u8>() );
+    sigma = sigma.map(|_| rng.gen::<u8>() );
 
     abe_encrypt_with_iv(pk, policy, plaintext, sigma)
 }

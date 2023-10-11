@@ -4,6 +4,7 @@ use rabe::utils::policy::pest::PolicyLanguage;
 
 
 
+#[allow(dead_code)]
 pub fn ac17_setup(c : &mut Criterion) {
     c.bench_function("ac17-setup", |b| {
 
@@ -14,6 +15,7 @@ pub fn ac17_setup(c : &mut Criterion) {
     });
 }
 
+#[allow(dead_code)]
 pub fn ac17_key_gen(c : &mut Criterion) {
     c.bench_function("ac17-key_gen", |b| {
         let (_, msk) = setup();
@@ -28,10 +30,10 @@ pub fn ac17_key_gen(c : &mut Criterion) {
 
 
 
-
+#[allow(dead_code)]
 pub fn ac17_encryption(c : &mut Criterion) {
     c.bench_function("ac17-cp_encryption", |b| {
-        let (pk, msk) = setup();
+        let (pk, _) = setup();
         let policy = String::from(r#""A" and "B""#);
         let plaintext : [u8; 2] = [1, 2];
         
@@ -43,6 +45,7 @@ pub fn ac17_encryption(c : &mut Criterion) {
     });
 }
 
+#[allow(dead_code)]
 pub fn ac17_decryption(c : &mut Criterion) {
     c.bench_function("ac17-cp_decryption", |b| {
         let (pk, msk) = setup();
@@ -59,4 +62,3 @@ pub fn ac17_decryption(c : &mut Criterion) {
         });
     });
 }
-

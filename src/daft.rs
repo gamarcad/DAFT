@@ -12,7 +12,10 @@ pub mod daft {
     use rand::rngs::OsRng;
 
 
+    // Type of the returned link.
     pub type Link = [u8;32];
+
+
 
     #[derive(Debug)]
     pub enum DAFTError {
@@ -26,11 +29,13 @@ pub mod daft {
         };
     }
 
-
+    
+    /// Generate and returns the public and master secret keys.
     pub fn authority_key_gen() -> (PublicKey, MasterSecretKey) {
         abe_setup()
     }
 
+    /// Generates and returns the sender key pair. 
     pub fn sender_key_gen() -> (VerifyingKey, SigningKey) {
         let mut csprng = OsRng;
         let signing_key: SigningKey = SigningKey::generate(&mut csprng);
@@ -38,6 +43,33 @@ pub mod daft {
         (verifying_key, signing_key)
     }
 
+    /// Prepare the file to be sent. Returns
+    /// the link, the signature and the ciphertext.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `signing_key` - Sender signing key.
+    /// * `public_key` - The administration public key.
+    /// * `access_policy` - Ciphertext access policy.
+    /// * `data` - The plaintext file to be encrypted.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// use daft::abe::Plaintext;
+    /// use daft::daft::daft::{sender_key_gen, authority_key_gen, prepare_sending};
+    /// 
+    /// let (_, signing_key ) = sender_key_gen();
+    /// let (apk, _) = authority_key_gen();
+    /// let plaintext = Plaintext::from("Hello !");
+    /// let access_policy =  String::from(r#""A" or "B""#);
+    /// let response = prepare_sending(
+    ///     &signing_key, 
+    ///     &apk, 
+    ///     access_policy, 
+    ///     &plaintext
+    /// );
+    /// ```
     pub fn prepare_sending( 
         signing_key : &SigningKey, 
         public_key : &PublicKey, 
@@ -64,16 +96,25 @@ pub mod daft {
             }
         };
 
+        // compute and sign the hash
         let hash : [u8; 32] = encrypted_file.hash_with_trusted_hash_c();        
-
-
-        // sign the hash
         let signature = signing_key.sign(&hash);
 
         Ok((hash, signature, encrypted_file))
 
     }
 
+
+    /// Decrypts and verifies the received file.
+    /// 
+    /// # Arguments
+    /// 
+    /// - `verifying_key` - Verification key of the sender.
+    /// - `secret_key` - The secret decryption key.
+    /// - `public_key` - The administration public key.
+    /// - `signature` - Link signature.
+    /// - `hash` - The link.
+    /// - `encrypted_file` - The encrypted file that should be decrypted.
     pub fn authenticate_received_file( 
         verification_key : &VerifyingKey,
         secret_key : &SecretKey,
