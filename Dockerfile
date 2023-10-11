@@ -1,8 +1,6 @@
 FROM rust:1.72
 
-VOLUME . /data
+WORKDIR /daft
 
-WORKDIR /data
-
-CMD cargo test
+CMD cargo bench --bench csv
 
