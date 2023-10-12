@@ -11,14 +11,14 @@ the Rust installation toolchain, as follow:
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh # Linux
 ```
-
+# Run DAFT
 Once installed, the following command will compile, execute and store the benchmark result
 in the already existing `communication_size.csv` and `execution_time.csv` files. 
 ```sh
 cargo bench --bench csv
 ```
 
-## Running DAFT with Docker
+## Run DAFT with Docker
 
 If you prefer to run the experiments in an isolated container, we also
 provide the following command using Docker (that should be installed before):
